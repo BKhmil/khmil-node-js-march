@@ -35,7 +35,7 @@ class UserService {
       );
   }
 
-  public replaceById(userId: number, user: IUser): Promise<IResolved> {
+  public replaceById(userId: number, dto: IUser): Promise<IResolved> {
     return userRepository
       .getById(userId)
       .then(({ users, userIndex }) => {
@@ -46,7 +46,7 @@ class UserService {
               404,
             );
           } else {
-            users[userIndex] = { ...user, id: userId };
+            users[userIndex] = { ...dto, id: userId };
           }
         } else {
           throw new ApiError("Can not access to user, db is empty", 404);
