@@ -1,3 +1,5 @@
 node_modules
 .idea
 khmil-node-js-march.iml
+
+dist
