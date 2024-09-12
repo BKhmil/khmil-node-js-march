@@ -1,6 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
 
-// import { body, validationResult } from "express-validator";
 import { PORT } from "./constants";
 import { ApiError } from "./errors/api-error";
 import { userRouter } from "./routers/user.router";
