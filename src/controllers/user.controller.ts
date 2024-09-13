@@ -5,65 +5,62 @@ import { IUser } from "../interfaces/user.interface";
 import { userService } from "../services/user.service";
 
 class UserController {
-  public getAll(
+  public async getAll(
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
-    return userService
-      .getAll()
-      .then(({ status, message, users }) => {
-        res.status(status).json({ message, users });
-      })
-      .catch((err: ApiError) => {
-        next(err);
-      });
+    try {
+      const { status, message, users } = await userService.getAll();
+      res.status(status).json({ message, users });
+    } catch (e) {
+      next(e as ApiError);
+    }
   }
 
-  public create(
+  public async create(
     // ESLint не дозволяє {}, {}
     req: Request<object, object, IUser>,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
-    return userService
-      .create(req.body)
-      .then(({ status, message, users }) => {
-        res.status(status).json({ message, data: users });
-      })
-      .catch((err: ApiError) => {
-        next(err);
-      });
+    try {
+      const { status, message, users } = await userService.create(req.body);
+      res.status(status).json({ message, data: users });
+    } catch (e) {
+      next(e as ApiError);
+    }
   }
 
-  public replaceById(
+  public async replaceById(
     req: Request<{ userId: string }, object, IUser>,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
-    return userService
-      .replaceById(Number(req.params.userId), req.body)
-      .then(({ status, message, users }) => {
-        res.status(status).json({ message, data: users });
-      })
-      .catch((err: ApiError) => {
-        next(err);
-      });
+    try {
+      const { status, message, users } = await userService.replaceById(
+        Number(req.params.userId),
+        req.body,
+      );
+      res.status(status).json({ message, data: users });
+    } catch (e) {
+      next(e as ApiError);
+    }
   }
 
-  public deleteById(
+  public async deleteById(
     req: Request<{ userId: string }>,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
-    return userService
-      .deleteById(Number(req.params.userId))
-      .then(({ status, message, users }) => {
-        res.status(status).json({ message, data: users });
-      })
-      .catch((err: ApiError) => {
-        next(err);
-      });
+    try {
+      const { status, message, users } = await userService.deleteById(
+        Number(req.params.userId),
+      );
+      res.status(status).json({ message, data: users });
+    } catch (e) {
+      next(e as ApiError);
+    }
   }
 }
 

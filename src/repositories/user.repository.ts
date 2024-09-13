@@ -10,13 +10,14 @@ class UserRepository {
     return fsService.writeAllToDB(dto);
   }
 
-  public getById(id: number): Promise<{ users: IUser[]; userIndex: number }> {
-    return fsService.readAllFromDB().then((users) => {
-      return {
-        users,
-        userIndex: users.findIndex((user) => user.id === id),
-      };
-    });
+  public async getById(
+    id: number,
+  ): Promise<{ users: IUser[]; userIndex: number }> {
+    const users = await fsService.readAllFromDB();
+    return {
+      users,
+      userIndex: users.findIndex((user) => user.id === id),
+    };
   }
 }
 
