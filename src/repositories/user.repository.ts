@@ -1,23 +1,25 @@
 import { IUser } from "../interfaces/user.interface";
-import { fsService } from "../services/fs.service";
+import { User } from "../models/user.model";
 
 class UserRepository {
   public getAll(): Promise<IUser[]> {
-    return fsService.readAllFromDB();
+    return User.find();
   }
 
   public writeAll(dto: IUser[]): Promise<IUser[]> {
-    return fsService.writeAllToDB(dto);
+    return User.create(dto);
   }
 
-  public async getById(
-    id: number,
-  ): Promise<{ users: IUser[]; userIndex: number }> {
-    const users = await fsService.readAllFromDB();
-    return {
-      users,
-      userIndex: users.findIndex((user) => user.id === id),
-    };
+  public getSingleById(id: string): Promise<IUser> {
+    return User.findById(id);
+  }
+
+  public updateById(id: string, dto: IUser): Promise<IUser> {
+    return User.findByIdAndUpdate(id, dto, { new: true });
+  }
+
+  public deleteById(id: string): Promise<IUser> {
+    return User.findByIdAndDelete(id);
   }
 }
 

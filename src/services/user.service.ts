@@ -1,4 +1,4 @@
-import { ApiError } from "../errors/api-error";
+// import { ApiError } from "../errors/api-error";
 import { IResolved } from "../interfaces/resolved.interface";
 import { IUser } from "../interfaces/user.interface";
 import { userRepository } from "../repositories/user.repository";
@@ -16,11 +16,7 @@ class UserService {
   public async create(dto: Omit<IUser, "id">): Promise<IResolved> {
     const users = await userRepository.getAll();
 
-    if (users.length) {
-      users.push({ ...dto, id: users[users.length - 1].id + 1 });
-    } else {
-      users.push({ ...dto, id: 1 });
-    }
+    users.push({ ...dto });
 
     const updatedUsers = await userRepository.writeAll(users);
 
@@ -31,47 +27,33 @@ class UserService {
     };
   }
 
-  public async replaceById(userId: number, dto: IUser): Promise<IResolved> {
-    const { users, userIndex } = await userRepository.getById(userId);
+  public async getSingleById(userId: string): Promise<IResolved> {
+    const user = await userRepository.getSingleById(userId);
+    return {
+      status: 200,
+      message: "Success",
+      users: [user],
+    };
+  }
 
-    if (users.length) {
-      if (userIndex === -1) {
-        throw new ApiError("User not found, no users with id " + userId, 404);
-      } else {
-        users[userIndex] = { ...dto, id: userId };
-      }
-    } else {
-      throw new ApiError("Can not access to user, db is empty", 404);
-    }
-
-    const updatedUsers = await userRepository.writeAll(users);
+  public async replaceById(userId: string, dto: IUser): Promise<IResolved> {
+    const user = await userRepository.updateById(userId, dto);
 
     return {
       status: 201,
       message: "User was successfully created or updated!",
-      users: updatedUsers,
+      users: [user],
     };
   }
 
-  public async deleteById(userId: number): Promise<IResolved> {
-    const { users, userIndex } = await userRepository.getById(userId);
-
-    if (users.length) {
-      if (userIndex === -1) {
-        throw new ApiError("User not found, no users with id " + userId, 404);
-      } else {
-        users.splice(userIndex, 1);
-      }
-    } else {
-      throw new ApiError("Can not access to user, db is empty", 404);
-    }
-    const updatedUsers = await userRepository.writeAll(users);
+  public async deleteById(userId: string): Promise<IResolved> {
+    const user = await userRepository.deleteById(userId);
 
     return {
       // 200, а не 204 для того щоб повідомлення виводило
       status: 200,
       message: "User was successfully deleted!",
-      users: updatedUsers,
+      users: [user],
     };
   }
 }

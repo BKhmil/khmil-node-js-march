@@ -3,3 +3,5 @@ node_modules
 khmil-node-js-march.iml
 
 dist
+
+.env

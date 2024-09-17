@@ -32,6 +32,21 @@ class UserController {
     }
   }
 
+  public async getSingleById(
+    req: Request<{ userId: string }, object, IUser>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { status, message, users } = await userService.getSingleById(
+        req.params.userId,
+      );
+      res.status(status).json({ message, data: users });
+    } catch (e) {
+      next(e as ApiError);
+    }
+  }
+
   public async replaceById(
     req: Request<{ userId: string }, object, IUser>,
     res: Response,
@@ -39,7 +54,7 @@ class UserController {
   ): Promise<void> {
     try {
       const { status, message, users } = await userService.replaceById(
-        Number(req.params.userId),
+        req.params.userId,
         req.body,
       );
       res.status(status).json({ message, data: users });
@@ -55,7 +70,7 @@ class UserController {
   ): Promise<void> {
     try {
       const { status, message, users } = await userService.deleteById(
-        Number(req.params.userId),
+        req.params.userId,
       );
       res.status(status).json({ message, data: users });
     } catch (e) {

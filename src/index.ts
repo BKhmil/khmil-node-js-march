@@ -1,13 +1,30 @@
 import express, { NextFunction, Request, Response } from "express";
+import * as mongoose from "mongoose";
 
-import { PORT } from "./constants";
+import { configs } from "./config/configs";
 import { ApiError } from "./errors/api-error";
 import { userRouter } from "./routers/user.router";
 
+const date = new Date();
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  console.log(
+    req.method +
+      " " +
+      req.path +
+      " " +
+      date.getHours() +
+      "-" +
+      date.getMinutes() +
+      "-" +
+      date.getSeconds(),
+  );
+  next();
+});
 
 app.use("/users", userRouter);
 
@@ -26,6 +43,9 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-app.listen(PORT, () => {
-  console.log("Server is running on http://localhost:" + PORT);
+app.listen(configs.APP_PORT, () => {
+  mongoose.connect(configs.MONGO_URI);
+  console.log(
+    "Server is running on http://" + configs.APP_HOST + ":" + configs.APP_PORT,
+  );
 });
