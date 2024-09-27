@@ -1,60 +1,34 @@
-// import { ApiError } from "../errors/api-error";
-import { IResolved } from "../interfaces/resolved.interface";
+import { ApiError } from "../errors/api-error";
 import { IUser } from "../interfaces/user.interface";
 import { userRepository } from "../repositories/user.repository";
 
 class UserService {
-  public async getAll(): Promise<IResolved> {
-    const users = await userRepository.getAll();
-    return {
-      status: 200,
-      message: `Success!${users.length ? "" : " But no data yet"}`,
-      users,
-    };
+  public async getList(): Promise<IUser[]> {
+    return await userRepository.getList();
   }
 
-  public async create(dto: Omit<IUser, "id">): Promise<IResolved> {
-    const users = await userRepository.getAll();
-
-    users.push({ ...dto });
-
-    const updatedUsers = await userRepository.writeAll(users);
-
-    return {
-      status: 201,
-      message: "User was successfully created or updated!",
-      users: updatedUsers,
-    };
+  public async create(dto: Partial<IUser>): Promise<IUser> {
+    await this.isEmailExistOrThrow(dto.email);
+    return await userRepository.create(dto);
   }
 
-  public async getSingleById(userId: string): Promise<IResolved> {
-    const user = await userRepository.getSingleById(userId);
-    return {
-      status: 200,
-      message: "Success",
-      users: [user],
-    };
+  public async getById(userId: string): Promise<IUser> {
+    return await userRepository.getById(userId);
   }
 
-  public async replaceById(userId: string, dto: IUser): Promise<IResolved> {
-    const user = await userRepository.updateById(userId, dto);
-
-    return {
-      status: 201,
-      message: "User was successfully created or updated!",
-      users: [user],
-    };
+  public async updateById(userId: string, dto: IUser): Promise<IUser> {
+    return await userRepository.updateById(userId, dto);
   }
 
-  public async deleteById(userId: string): Promise<IResolved> {
-    const user = await userRepository.deleteById(userId);
+  public async deleteById(userId: string): Promise<void> {
+    return await userRepository.deleteById(userId);
+  }
 
-    return {
-      // 200, а не 204 для того щоб повідомлення виводило
-      status: 200,
-      message: "User was successfully deleted!",
-      users: [user],
-    };
+  private async isEmailExistOrThrow(email: string): Promise<void> {
+    const user = await userRepository.getByEmail(email);
+    if (user) {
+      throw new ApiError("Email already exists", 409);
+    }
   }
 }
 

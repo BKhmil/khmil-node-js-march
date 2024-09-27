@@ -1,20 +1,19 @@
 import { NextFunction, Request, Response } from "express";
 
-import { ApiError } from "../errors/api-error";
 import { IUser } from "../interfaces/user.interface";
 import { userService } from "../services/user.service";
 
 class UserController {
-  public async getAll(
+  public async getList(
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
     try {
-      const { status, message, users } = await userService.getAll();
-      res.status(status).json({ message, users });
+      const result = await userService.getList();
+      res.status(200).json(result);
     } catch (e) {
-      next(e as ApiError);
+      next(e);
     }
   }
 
@@ -25,41 +24,36 @@ class UserController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const { status, message, users } = await userService.create(req.body);
-      res.status(status).json({ message, data: users });
+      const result = await userService.create(req.body);
+      res.status(201).json(result);
     } catch (e) {
-      next(e as ApiError);
+      next(e);
     }
   }
 
-  public async getSingleById(
+  public async getById(
     req: Request<{ userId: string }, object, IUser>,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
     try {
-      const { status, message, users } = await userService.getSingleById(
-        req.params.userId,
-      );
-      res.status(status).json({ message, data: users });
+      const result = await userService.getById(req.params.userId);
+      res.status(200).json(result);
     } catch (e) {
-      next(e as ApiError);
+      next(e);
     }
   }
 
-  public async replaceById(
+  public async updateById(
     req: Request<{ userId: string }, object, IUser>,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
     try {
-      const { status, message, users } = await userService.replaceById(
-        req.params.userId,
-        req.body,
-      );
-      res.status(status).json({ message, data: users });
+      const result = await userService.updateById(req.params.userId, req.body);
+      res.status(200).json(result);
     } catch (e) {
-      next(e as ApiError);
+      next(e);
     }
   }
 
@@ -69,12 +63,10 @@ class UserController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const { status, message, users } = await userService.deleteById(
-        req.params.userId,
-      );
-      res.status(status).json({ message, data: users });
+      await userService.deleteById(req.params.userId);
+      res.sendStatus(204);
     } catch (e) {
-      next(e as ApiError);
+      next(e);
     }
   }
 }

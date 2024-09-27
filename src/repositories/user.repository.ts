@@ -2,24 +2,28 @@ import { IUser } from "../interfaces/user.interface";
 import { User } from "../models/user.model";
 
 class UserRepository {
-  public getAll(): Promise<IUser[]> {
-    return User.find();
+  public async getList(): Promise<IUser[]> {
+    return await User.find();
   }
 
-  public writeAll(dto: IUser[]): Promise<IUser[]> {
-    return User.create(dto);
+  public async create(dto: Partial<IUser>): Promise<IUser> {
+    return await User.create(dto);
   }
 
-  public getSingleById(id: string): Promise<IUser> {
-    return User.findById(id);
+  public async getById(userId: string): Promise<IUser | null> {
+    return await User.findById(userId);
   }
 
-  public updateById(id: string, dto: IUser): Promise<IUser> {
-    return User.findByIdAndUpdate(id, dto, { new: true });
+  public async getByEmail(email: string): Promise<IUser | null> {
+    return await User.findOne({ email });
   }
 
-  public deleteById(id: string): Promise<IUser> {
-    return User.findByIdAndDelete(id);
+  public async updateById(userId: string, dto: IUser): Promise<IUser | null> {
+    return await User.findByIdAndUpdate(userId, dto, { new: true });
+  }
+
+  public async deleteById(userId: string): Promise<void> {
+    await User.deleteOne({ _id: userId });
   }
 }
 

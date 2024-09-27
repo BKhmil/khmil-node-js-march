@@ -1,32 +1,29 @@
-import { body } from "express-validator";
+import joi from "joi";
 
-import { Roles } from "../enums/roles.enum";
+import { regexConstant } from "../constants/regex.constant";
 
-const userValidationRules = [
-  body("name")
-    .isLength({ min: 2 })
-    .withMessage("Name must be at least 2 characters long"),
-  body("age")
-    .isInt({ min: 18, max: 120 })
-    .withMessage("Age must be a valid number between 18 and 120"),
-  body("email")
-    .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
-    .withMessage("Email must be a valid email address [something]@gmail.com"),
-  body("password")
-    .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters long"),
-  body("role")
-    .optional()
-    .isIn(Object.values(Roles))
-    .withMessage("Role must be a valid role"),
-  body("isVerified")
-    .optional()
-    .isBoolean()
-    .withMessage("isVerified must be a boolean"),
-  body("isDeleted")
-    .optional()
-    .isBoolean()
-    .withMessage("isDeleted must be a boolean"),
-];
+export class UserValidator {
+  private static name = joi.string().min(3).max(20).trim();
+  private static age = joi.number().min(18).max(120);
+  private static email = joi
+    .string()
+    .lowercase()
+    .trim()
+    .regex(regexConstant.EMAIL);
+  private static password = joi.string().trim().regex(regexConstant.PASSWORD);
+  private static phone = joi.string().trim().regex(regexConstant.PHONE);
 
-export { userValidationRules };
+  public static create = joi.object({
+    name: this.name.required(),
+    age: this.age.required(),
+    email: this.email.required(),
+    password: this.password.required(),
+    phone: this.phone,
+  });
+
+  public static update = joi.object({
+    name: this.name,
+    age: this.age,
+    phone: this.phone,
+  });
+}
