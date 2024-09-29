@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
+import { ITokenPair } from "../interfaces/token.interface";
 import { ISignIn, IUser } from "../interfaces/user.interface";
 import { authService } from "../services/auth.service";
 
@@ -30,6 +31,19 @@ class AuthController {
     try {
       // по аналогії з методолм вище, просто викликаємо відповідний сервіс передаючи відповідні дані
       const result = await authService.signIn(req.body);
+      res.status(201).json(result);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  public async refresh(
+    req: Request<object, object, Omit<ITokenPair, "accessToken">>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const result = await authService.refresh(req.body);
       res.status(201).json(result);
     } catch (e) {
       next(e);

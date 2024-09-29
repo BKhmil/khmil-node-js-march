@@ -13,6 +13,10 @@ class TokenRepository {
   public async findByParams(params: Partial<IToken>): Promise<IToken | null> {
     return await Token.findOne(params);
   }
+
+  public async deleteById(tokenId: string): Promise<void> {
+    await Token.deleteOne({ _id: tokenId });
+  }
 }
 
 export const tokenRepository = new TokenRepository();
