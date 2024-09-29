@@ -1,3 +1,4 @@
+import { TokenType } from "../enums/token-type.enum";
 import { ApiError } from "../errors/api-error";
 import { ITokenPair } from "../interfaces/token.interface";
 import { ISignIn, IUser } from "../interfaces/user.interface";
@@ -67,6 +68,32 @@ class AuthService {
     // віддаємо назад інфу про юзера і токени
     // як я розумію то в подальшому перепишемо так щоб просто токени віддавались
     return { user, tokens };
+  }
+
+  // треба згенерувати нову пару, видалити стару і записати нову віддавши потім клієнту
+  public async refresh(
+    refreshToken: Omit<ITokenPair, "accessToken">,
+  ): Promise<ITokenPair> {
+    const tokenDocument = await tokenRepository.findByParams(refreshToken);
+    if (!tokenDocument) {
+      throw new ApiError("Token is not valid", 401);
+    }
+
+    const payload = tokenService.verifyToken(
+      refreshToken.refreshToken,
+      TokenType.REFRESH,
+    );
+
+    await tokenRepository.deleteById(tokenDocument._id);
+
+    const tokens = tokenService.generateTokens({
+      userId: payload.userId,
+      role: payload.role,
+    });
+    await tokenRepository.create({ ...tokens, _userId: payload.userId });
+    // віддаємо назад інфу про юзера і токени
+    // як я розумію то в подальшому перепишемо так щоб просто токени віддавались
+    return tokens;
   }
 
   // метод для перевірки існування емейлу
