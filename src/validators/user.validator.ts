@@ -2,6 +2,7 @@ import joi from "joi";
 
 import { regexConstant } from "../constants/regex.constant";
 
+// клас який віддає валідаційні схеми
 export class UserValidator {
   private static name = joi.string().min(3).max(20).trim();
   private static age = joi.number().min(18).max(120);

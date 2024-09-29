@@ -1,3 +1,4 @@
+// клас який додає поле status для помилок
 export class ApiError extends Error {
   constructor(
     public readonly message: string,
