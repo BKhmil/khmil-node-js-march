@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
+import { ITokenPayload } from "../interfaces/token.interface";
 import { ISignIn, IUser } from "../interfaces/user.interface";
 import { authService } from "../services/auth.service";
 
@@ -30,6 +31,23 @@ class AuthController {
     try {
       // по аналогії з методолм вище, просто викликаємо відповідний сервіс передаючи відповідні дані
       const result = await authService.signIn(req.body);
+      res.status(201).json(result);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  // метод який перевидає токени на основі refreshToken
+  public async refresh(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const refreshToken = req.res.locals.refreshToken as string;
+      const jwtPayload = req.res.locals.jwtPayload as ITokenPayload;
+      // по аналогії з методолм вище, просто викликаємо відповідний сервіс передаючи відповідні дані
+      const result = await authService.refresh(refreshToken, jwtPayload);
       res.status(201).json(result);
     } catch (e) {
       next(e);
