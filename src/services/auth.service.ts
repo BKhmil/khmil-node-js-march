@@ -1,8 +1,10 @@
+import { EEmailType } from "../enums/email-type.enum";
 import { ApiError } from "../errors/api-error";
 import { ITokenPair, ITokenPayload } from "../interfaces/token.interface";
 import { ISignIn, IUser } from "../interfaces/user.interface";
 import { tokenRepository } from "../repositories/token.repository";
 import { userRepository } from "../repositories/user.repository";
+import { emailService } from "./email.service";
 import { passwordService } from "./password.service";
 import { tokenService } from "./token.service";
 
@@ -32,6 +34,15 @@ class AuthService {
 
     // після генерації записуємо токени у бд
     await tokenRepository.create({ ...tokens, _userId: user._id });
+
+    try {
+      await emailService.sendMail(user.email, EEmailType.WELCOME, {
+        name: user.name,
+      });
+    } catch (e) {
+      throw new ApiError(e.message, 500);
+    }
+
     // віддаємо назад дані з токенами
     return { user, tokens };
   }
