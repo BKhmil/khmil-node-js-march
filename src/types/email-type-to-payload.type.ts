@@ -7,7 +7,7 @@ export type EmailTypeToPayload = {
 
   [EEmailType.FORGOT_PASSWORD]: PickRequired<
     EmailPayloadCombined,
-    "name" | "email"
+    "name" | "email" | "actionToken"
   >;
 
   [EEmailType.OLD_VISIT]: PickRequired<EmailPayloadCombined, "email">;

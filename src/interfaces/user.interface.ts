@@ -15,5 +15,7 @@ export interface IUser {
 }
 
 // тип який в результаті міститиме поля з паролем і емейлом
-// до речі здивувався що в даному випадку оператор | працює не як union, а як об'єднання
 export type ISignIn = Pick<IUser, "email" | "password">;
+
+export type IResetPasswordSend = Pick<IUser, "email">;
+export type IResetPasswordSet = Pick<IUser, "password"> & { token: string };

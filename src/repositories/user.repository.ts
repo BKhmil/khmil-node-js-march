@@ -24,7 +24,10 @@ class UserRepository {
 
   // метод що оновлює документ в колекції users за його айді
   // { new: true } вказує на те що документ має повернутися після оновлення
-  public async updateById(userId: string, dto: IUser): Promise<IUser | null> {
+  public async updateById(
+    userId: string,
+    dto: Partial<IUser>,
+  ): Promise<IUser | null> {
     return await User.findByIdAndUpdate(userId, dto, { new: true });
   }
 

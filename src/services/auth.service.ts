@@ -1,7 +1,14 @@
+import { EActionTokenType } from "../enums/action-token-type.enum";
 import { EEmailType } from "../enums/email-type.enum";
 import { ApiError } from "../errors/api-error";
 import { ITokenPair, ITokenPayload } from "../interfaces/token.interface";
-import { ISignIn, IUser } from "../interfaces/user.interface";
+import {
+  IResetPasswordSend,
+  IResetPasswordSet,
+  ISignIn,
+  IUser,
+} from "../interfaces/user.interface";
+import { actionTokenRepository } from "../repositories/action-token.repository";
 import { tokenRepository } from "../repositories/token.repository";
 import { userRepository } from "../repositories/user.repository";
 import { emailService } from "./email.service";
@@ -110,6 +117,44 @@ class AuthService {
     await emailService.sendMail(user.email, EEmailType.LOGOUT_ALL, {
       name: user.name,
     });
+  }
+
+  public async forgotPasswordSendEmail(dto: IResetPasswordSend): Promise<void> {
+    const user = await userRepository.getByEmail(dto.email);
+    if (!user) {
+      throw new ApiError("User not found", 404);
+    }
+
+    const token = tokenService.generateActionTokens(
+      { userId: user._id, role: user.role },
+      EActionTokenType.FORGOT_PASSWORD,
+    );
+
+    await actionTokenRepository.create({
+      token,
+      type: EActionTokenType.FORGOT_PASSWORD,
+      _userId: user._id,
+    });
+
+    await emailService.sendMail(user.email, EEmailType.FORGOT_PASSWORD, {
+      name: user.name,
+      email: user.email,
+      actionToken: token,
+    });
+  }
+
+  public async forgotPasswordSet(
+    dto: IResetPasswordSet,
+    payload: ITokenPayload,
+  ): Promise<void> {
+    const password = await passwordService.hashPassword(dto.password);
+    await userRepository.updateById(payload.userId, { password });
+
+    await actionTokenRepository.deleteManyByParams({
+      _userId: payload.userId,
+      type: EActionTokenType.FORGOT_PASSWORD,
+    });
+    await tokenRepository.deleteManyByParams({ _userId: payload.userId });
   }
 
   // метод для перевірки існування емейлу
