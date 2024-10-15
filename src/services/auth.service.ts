@@ -84,7 +84,7 @@ class AuthService {
     refreshToken: string,
     payload: ITokenPayload,
   ): Promise<ITokenPair> {
-    await tokenRepository.deleteByParams({ refreshToken });
+    await tokenRepository.deleteOneByParams({ refreshToken });
     const tokens = tokenService.generateTokens({
       userId: payload.userId,
       role: payload.role,
@@ -92,6 +92,24 @@ class AuthService {
     await tokenRepository.create({ ...tokens, _userId: payload.userId });
 
     return tokens;
+  }
+
+  public async logout(payload: ITokenPayload, tokenId: string): Promise<void> {
+    const user = await userRepository.getById(payload.userId);
+    await tokenRepository.deleteOneByParams({ _id: tokenId });
+
+    await emailService.sendMail(user.email, EEmailType.LOGOUT, {
+      name: user.name,
+    });
+  }
+
+  public async logoutAll(payload: ITokenPayload): Promise<void> {
+    const user = await userRepository.getById(payload.userId);
+    await tokenRepository.deleteManyByParams({ _userId: payload.userId });
+
+    await emailService.sendMail(user.email, EEmailType.LOGOUT_ALL, {
+      name: user.name,
+    });
   }
 
   // метод для перевірки існування емейлу
