@@ -11,4 +11,8 @@ export type EmailTypeToPayload = {
   >;
 
   [EEmailType.OLD_VISIT]: PickRequired<EmailPayloadCombined, "email">;
+
+  [EEmailType.LOGOUT]: PickRequired<EmailPayloadCombined, "name">;
+
+  [EEmailType.LOGOUT_ALL]: PickRequired<EmailPayloadCombined, "name">;
 };

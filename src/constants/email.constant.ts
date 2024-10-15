@@ -13,4 +13,12 @@ export const emailConstants = {
     subject: "Old visit",
     template: "old-visit",
   },
+  [EEmailType.LOGOUT]: {
+    subject: "Logout",
+    template: "logout",
+  },
+  [EEmailType.LOGOUT_ALL]: {
+    subject: "Logout from all devices",
+    template: "logout-all",
+  },
 };

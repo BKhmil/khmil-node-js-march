@@ -53,6 +53,35 @@ class AuthController {
       next(e);
     }
   }
+
+  public async logout(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const jwtPayload = req.res.locals.jwtPayload as ITokenPayload;
+      const accessToken = req.res.locals.accessToken as string;
+      await authService.logout(accessToken, jwtPayload);
+      res.sendStatus(204);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  public async logoutAll(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const jwtPayload = req.res.locals.jwtPayload as ITokenPayload;
+      await authService.logoutAll(jwtPayload);
+      res.sendStatus(204);
+    } catch (e) {
+      next(e);
+    }
+  }
 }
 
 export const authController = new AuthController();

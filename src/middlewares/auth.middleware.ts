@@ -34,6 +34,7 @@ class AuthMiddleware {
       }
       // кладемо payload в locals, щоб він був доступний в наступних функціях які опрацьовуватимуть запит
       req.res.locals.jwtPayload = payload;
+      req.res.locals.accessToken = accessToken;
       next();
     } catch (e) {
       next(e);

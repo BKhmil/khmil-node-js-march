@@ -94,6 +94,41 @@ class AuthService {
     return tokens;
   }
 
+  public async logout(
+    accessToken: string,
+    payload: ITokenPayload,
+  ): Promise<void> {
+    await tokenRepository.deleteSignByAccessToken(accessToken);
+
+    const user = await userRepository.getById(payload.userId);
+    // по-ідеї це не потрібно, бо якщо користувач скористався функцією логауту то явно він є в нашій системі
+    // if (!user) {
+    //   throw new ApiError("User not found", 404);
+    // }
+
+    try {
+      await emailService.sendMail(user.email, EEmailType.LOGOUT, {
+        name: user.name,
+      });
+    } catch (e) {
+      throw new ApiError(e.message, 500);
+    }
+  }
+
+  public async logoutAll(payload: ITokenPayload): Promise<void> {
+    await tokenRepository.deleteAllSignsByUserId(payload.userId);
+
+    const user = await userRepository.getById(payload.userId);
+
+    try {
+      await emailService.sendMail(user.email, EEmailType.LOGOUT_ALL, {
+        name: user.name,
+      });
+    } catch (e) {
+      throw new ApiError(e.message, 500);
+    }
+  }
+
   // метод для перевірки існування емейлу
   private async isEmailExistOrThrow(email: string): Promise<void> {
     // отримуємо користувача за емейлом
