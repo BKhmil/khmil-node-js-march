@@ -7,6 +7,7 @@ import {
   IResetPasswordSet,
   ISignIn,
   IUser,
+  IVerifyEmail,
 } from "../interfaces/user.interface";
 import { actionTokenRepository } from "../repositories/action-token.repository";
 import { tokenRepository } from "../repositories/token.repository";
@@ -42,9 +43,25 @@ class AuthService {
     // після генерації записуємо токени у бд
     await tokenRepository.create({ ...tokens, _userId: user._id });
 
+    // тепер ще потрібно згенерувати екшн токен для підтвердження пошти
+    const actionToken = tokenService.generateActionTokens(
+      {
+        userId: user._id,
+        role: user.role,
+      },
+      EActionTokenType.VERIFY_EMAIL,
+    );
+
+    await actionTokenRepository.create({
+      _userId: user._id,
+      type: EActionTokenType.VERIFY_EMAIL,
+      token: actionToken,
+    });
+
     try {
       await emailService.sendMail(user.email, EEmailType.WELCOME, {
         name: user.name,
+        actionToken,
       });
     } catch (e) {
       throw new ApiError(e.message, 500);
@@ -155,6 +172,19 @@ class AuthService {
       type: EActionTokenType.FORGOT_PASSWORD,
     });
     await tokenRepository.deleteManyByParams({ _userId: payload.userId });
+  }
+
+  public async verifyEmail(
+    dto: IVerifyEmail,
+    payload: ITokenPayload,
+  ): Promise<void> {
+    const user = userRepository.getByEmail(dto.email);
+    if (!user) {
+      throw new ApiError("User not found", 404);
+    }
+
+    await userRepository.updateById(payload.userId, { isVerified: true });
+    await actionTokenRepository.deleteManyByParams({ token: dto.token });
   }
 
   // метод для перевірки існування емейлу

@@ -19,3 +19,5 @@ export type ISignIn = Pick<IUser, "email" | "password">;
 
 export type IResetPasswordSend = Pick<IUser, "email">;
 export type IResetPasswordSet = Pick<IUser, "password"> & { token: string };
+
+export type IVerifyEmail = Pick<IUser, "email"> & { token: string };

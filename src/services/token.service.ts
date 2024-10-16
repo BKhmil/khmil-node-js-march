@@ -43,6 +43,9 @@ class TokenService {
         case EActionTokenType.FORGOT_PASSWORD:
           secret = configs.ACTION_FORGOT_PASSWORD_SECRET;
           break;
+        case EActionTokenType.VERIFY_EMAIL:
+          secret = configs.ACTION_VERIFY_EMAIL_SECRET;
+          break;
         default:
           throw new ApiError("Invalid token type", 400);
       }
@@ -65,6 +68,10 @@ class TokenService {
       case EActionTokenType.FORGOT_PASSWORD:
         secret = configs.ACTION_FORGOT_PASSWORD_SECRET;
         expiration = configs.ACTION_FORGOT_PASSWORD_EXPIRATION;
+        break;
+      case EActionTokenType.VERIFY_EMAIL:
+        secret = configs.ACTION_VERIFY_EMAIL_SECRET;
+        expiration = configs.ACTION_VERIFY_EMAIL_EXPIRATION;
         break;
       default:
         throw new ApiError("Invalid token type", 400);

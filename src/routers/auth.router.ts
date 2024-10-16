@@ -36,10 +36,17 @@ router.post(
 );
 
 router.post("/forgot-password", authController.forgotPasswordSendEmail);
+
 router.put(
   "/forgot-password",
   authMiddleware.checkActionToken,
   authController.forgotPasswordSet,
+);
+
+router.put(
+  "/verify-email",
+  authMiddleware.checkActionToken,
+  authController.verifyEmail,
 );
 
 export const authRouter = router;

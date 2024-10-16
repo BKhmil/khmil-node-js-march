@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { EActionTokenType } from "../enums/action-token-type.enum";
 import { TokenType } from "../enums/token-type.enum";
 import { ApiError } from "../errors/api-error";
-import { IResetPasswordSet } from "../interfaces/user.interface";
+import { IResetPasswordSet, IVerifyEmail } from "../interfaces/user.interface";
 import { actionTokenRepository } from "../repositories/action-token.repository";
 import { tokenRepository } from "../repositories/token.repository";
 import { tokenService } from "../services/token.service";
@@ -81,7 +81,7 @@ class AuthMiddleware {
   }
 
   public async checkActionToken(
-    req: Request<object, object, IResetPasswordSet>,
+    req: Request<object, object, IResetPasswordSet | IVerifyEmail>,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
@@ -90,7 +90,11 @@ class AuthMiddleware {
 
       const payload = tokenService.verifyToken(
         token,
-        EActionTokenType.FORGOT_PASSWORD,
+        // цей момент напевно треба реалізовувати через switch,
+        // але оскільки зараз лише 2 значення в EActionTokenType, то і так нормально
+        "password" in req.body
+          ? EActionTokenType.FORGOT_PASSWORD
+          : EActionTokenType.VERIFY_EMAIL,
       );
 
       const tokenEntity = await actionTokenRepository.getByToken(token);
