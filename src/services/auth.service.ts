@@ -10,6 +10,7 @@ import {
   IUser,
 } from "../interfaces/user.interface";
 import { actionTokenRepository } from "../repositories/action-token.repository";
+import { oldPasswordRepository } from "../repositories/old-password.repository";
 import { tokenRepository } from "../repositories/token.repository";
 import { userRepository } from "../repositories/user.repository";
 import { emailService } from "./email.service";
@@ -160,6 +161,21 @@ class AuthService {
     dto: IResetPasswordSet,
     payload: ITokenPayload,
   ): Promise<void> {
+    const { password: oldHashedPassword } = await userRepository.getById(
+      payload.userId,
+    );
+
+    await this.isNewPasswordNewOrThrow(
+      dto.password,
+      oldHashedPassword,
+      payload.userId,
+    );
+
+    await oldPasswordRepository.create({
+      password: oldHashedPassword,
+      _userId: payload.userId,
+    });
+
     const password = await passwordService.hashPassword(dto.password);
     await userRepository.updateById(payload.userId, { password });
 
@@ -182,19 +198,57 @@ class AuthService {
     payload: ITokenPayload,
     dto: IChangePassword,
   ): Promise<void> {
-    const user = await userRepository.getById(payload.userId);
-
-    const isPasswordCorrect = await passwordService.comparePassword(
-      dto.oldPassword,
-      user.password,
+    const { password: oldHashedPassword } = await userRepository.getById(
+      payload.userId,
     );
-    if (!isPasswordCorrect) {
+
+    const isOldPasswordCorrect = await passwordService.comparePassword(
+      dto.oldPassword,
+      oldHashedPassword,
+    );
+    if (!isOldPasswordCorrect) {
       throw new ApiError("Invalid previous password", 401);
     }
+
+    await this.isNewPasswordNewOrThrow(
+      dto.password,
+      oldHashedPassword,
+      payload.userId,
+    );
+
+    await oldPasswordRepository.create({
+      password: oldHashedPassword,
+      _userId: payload.userId,
+    });
 
     const password = await passwordService.hashPassword(dto.password);
     await userRepository.updateById(payload.userId, { password });
     await tokenRepository.deleteManyByParams({ _userId: payload.userId });
+  }
+
+  private async isNewPasswordNewOrThrow(
+    newPassword: string,
+    oldHashedPassword: string,
+    userId: string,
+  ): Promise<void> {
+    const isNewPasswordSameAsACurrent = await passwordService.comparePassword(
+      newPassword,
+      oldHashedPassword,
+    );
+    if (isNewPasswordSameAsACurrent) {
+      throw new ApiError("You can not set the old password", 401);
+    }
+
+    const docs = await oldPasswordRepository.getMany(userId);
+    for (const doc of docs) {
+      const isSame = await passwordService.comparePassword(
+        newPassword,
+        doc.password,
+      );
+      if (isSame) {
+        throw new ApiError("You can not set the old password", 401);
+      }
+    }
   }
 
   // метод для перевірки існування емейлу

@@ -37,4 +37,9 @@ export class UserValidator {
     oldPassword: this.password.required(),
     password: this.password.required(),
   });
+
+  public static forgotPasswordSet = joi.object({
+    password: this.password.required(),
+    token: joi.string().required(),
+  });
 }
