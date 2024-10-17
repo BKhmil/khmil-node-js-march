@@ -42,9 +42,21 @@ class AuthService {
     // після генерації записуємо токени у бд
     await tokenRepository.create({ ...tokens, _userId: user._id });
 
+    const token = tokenService.generateActionTokens(
+      { userId: user._id, role: user.role },
+      EActionTokenType.VERIFY_EMAIL,
+    );
+
+    await actionTokenRepository.create({
+      token,
+      type: EActionTokenType.VERIFY_EMAIL,
+      _userId: user._id,
+    });
+
     try {
       await emailService.sendMail(user.email, EEmailType.WELCOME, {
         name: user.name,
+        actionToken: token,
       });
     } catch (e) {
       throw new ApiError(e.message, 500);
@@ -155,6 +167,14 @@ class AuthService {
       type: EActionTokenType.FORGOT_PASSWORD,
     });
     await tokenRepository.deleteManyByParams({ _userId: payload.userId });
+  }
+
+  public async verify(payload: ITokenPayload): Promise<void> {
+    await userRepository.updateById(payload.userId, { isVerified: true });
+    await actionTokenRepository.deleteManyByParams({
+      _userId: payload.userId,
+      type: EActionTokenType.VERIFY_EMAIL,
+    });
   }
 
   // метод для перевірки існування емейлу
