@@ -3,6 +3,7 @@ import { EEmailType } from "../enums/email-type.enum";
 import { ApiError } from "../errors/api-error";
 import { ITokenPair, ITokenPayload } from "../interfaces/token.interface";
 import {
+  IChangePassword,
   IResetPasswordSend,
   IResetPasswordSet,
   ISignIn,
@@ -175,6 +176,25 @@ class AuthService {
       _userId: payload.userId,
       type: EActionTokenType.VERIFY_EMAIL,
     });
+  }
+
+  public async changePassword(
+    payload: ITokenPayload,
+    dto: IChangePassword,
+  ): Promise<void> {
+    const user = await userRepository.getById(payload.userId);
+
+    const isPasswordCorrect = await passwordService.comparePassword(
+      dto.oldPassword,
+      user.password,
+    );
+    if (!isPasswordCorrect) {
+      throw new ApiError("Invalid previous password", 401);
+    }
+
+    const password = await passwordService.hashPassword(dto.password);
+    await userRepository.updateById(payload.userId, { password });
+    await tokenRepository.deleteManyByParams({ _userId: payload.userId });
   }
 
   // метод для перевірки існування емейлу

@@ -14,7 +14,7 @@ class UserRepository {
 
   // метод що знаходить документ за айді в колекції users
   public async getById(userId: string): Promise<IUser | null> {
-    return await User.findById(userId);
+    return await User.findById(userId).select("+password");
   }
 
   // метод що шукає документ за емейлом в колекції users при цьому додаючи в результаті поле з паролем

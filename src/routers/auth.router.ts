@@ -37,10 +37,18 @@ router.post(
 );
 
 router.post("/forgot-password", authController.forgotPasswordSendEmail);
+
 router.put(
   "/forgot-password",
   authMiddleware.checkActionToken(EActionTokenType.FORGOT_PASSWORD),
   authController.forgotPasswordSet,
+);
+
+router.put(
+  "/change-password",
+  authMiddleware.checkAccessToken,
+  commonMiddleware.isBodyValid(UserValidator.changePassword),
+  authController.changePassword,
 );
 
 router.put(

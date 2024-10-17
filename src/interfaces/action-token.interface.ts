@@ -5,4 +5,6 @@ export interface IActionToken {
   token: string;
   type: EActionTokenType;
   _userId: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
