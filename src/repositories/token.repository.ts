@@ -1,3 +1,5 @@
+import { AggregateOptions, PipelineStage } from "mongoose";
+
 import { IToken } from "../interfaces/token.interface";
 import { Token } from "../models/token.model";
 
@@ -14,6 +16,12 @@ class TokenRepository {
     return await Token.findOne(params);
   }
 
+  public async findManyByParams(
+    params: Partial<IToken>,
+  ): Promise<IToken[] | null> {
+    return await Token.find(params);
+  }
+
   public async deleteOneByParams(params: Partial<IToken>): Promise<void> {
     await Token.deleteOne(params);
   }
@@ -27,6 +35,13 @@ class TokenRepository {
       createdAt: { $lt: date },
     });
     return deletedCount;
+  }
+
+  public async aggregate(
+    pipeline: PipelineStage[],
+    options: AggregateOptions = {},
+  ): Promise<any[]> {
+    return await Token.aggregate(pipeline, options);
   }
 }
 

@@ -13,7 +13,7 @@ export type EmailTypeToPayload = {
     "name" | "email" | "actionToken"
   >;
 
-  [EEmailType.OLD_VISIT]: PickRequired<EmailPayloadCombined, "email">;
+  [EEmailType.OLD_VISIT]: PickRequired<EmailPayloadCombined, "name">;
 
   [EEmailType.LOGOUT]: PickRequired<EmailPayloadCombined, "name">;
 
